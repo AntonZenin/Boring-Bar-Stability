@@ -1,0 +1,9 @@
+{
+    "cmake.sourceDirectory": "${workspaceFolder}/cpp",
+    "cmake.buildDirectory": "${workspaceFolder}/build",
+    "cmake.configureOnOpen": false,
+    "C_Cpp.default.cppStandard": "c++17",
+    "files.associations": {
+        "*.hpp": "cpp"
+    }
+}

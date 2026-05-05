@@ -1,0 +1,94 @@
+# ============================================
+# Build output
+# ============================================
+build/
+out/
+cmake-build-*/
+
+# Скомпилированные C++ модули и артефакты
+*.pyd
+*.dll
+*.lib
+*.exp
+*.obj
+*.o
+*.so
+*.dylib
+*.exe
+*.pdb
+*.ilk
+*.iobj
+*.ipdb
+
+# ============================================
+# CMake
+# ============================================
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+cmake_install.cmake
+install_manifest.txt
+Makefile
+*.cmake
+!CMakeLists.txt
+
+# ============================================
+# Visual Studio
+# ============================================
+.vs/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.tlog
+*.recipe
+*.lastbuildstate
+Debug/
+Release/
+x64/
+x86/
+
+# ============================================
+# Python
+# ============================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.Python
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Виртуальные окружения
+venv/
+env/
+.venv/
+.env/
+
+# ============================================
+# IDE
+# ============================================
+.idea/
+*.swp
+*.swo
+*~
+
+# VS Code: оставляем settings.json в репо, всё остальное игнорируем
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# ============================================
+# OS
+# ============================================
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
