@@ -209,10 +209,7 @@ class DPartitionApp:
             self._reset_axes()
             self._curve_count = 0
 
-        # Чтобы кривая выглядела как на рисунке из отчёта (с короткими
-        # "усиками" — штрихами от каждой точки наружу), нарисуем
-        # сам контур и редкие тики. Тики ставим, чтобы пометить
-        # направление обхода по omega (это важно для метода D-разбиения).
+    
         label = (f"L={params['L']:g} м, δ₁={params['delta1']:g}, "
                  f"ω∈[{params['w_min']:g}, {params['w_max']:g}]")
 
@@ -230,10 +227,7 @@ class DPartitionApp:
             xytext=(8, 8), textcoords="offset points",
             fontsize=8, color=color,
         )
-
-        # Штрихи-усики, направленные перпендикулярно кривой — как на
-        # рис. 4 из отчёта. Это визуализация D-разбиения: штрих указывает
-        # в сторону "области с большим числом неустойчивых корней".
+                
         if self.ticks_var.get():
             self._draw_hatch_ticks(re, im, color=color)
 
