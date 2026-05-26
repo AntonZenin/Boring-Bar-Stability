@@ -218,16 +218,36 @@ class DPartitionApp:
 
         # Точка с минимальным |Im| — там, где кривая пересекает Re-ось:
         # это та самая характеристическая точка из отчёта (-94.84; 2.04).
-        i_cross = int(np.argmin(np.abs(im)))
-        self.ax.plot(re[i_cross], im[i_cross], "s",
-                     color=color, markersize=6)
-        self.ax.annotate(
-            f"  Re={re[i_cross]:.3g}\n  Im={im[i_cross]:.3g}",
-            xy=(re[i_cross], im[i_cross]),
-            xytext=(8, 8), textcoords="offset points",
-            fontsize=8, color=color,
-        )
-                
+
+        finite_mask = np.isfinite(im) & np.isfinite(re)
+        if finite_mask.any():
+            valid_idx = np.where(finite_mask)[0]
+            i_cross = valid_idx[np.argmin(np.abs(im[valid_idx]))]
+            # Заметный маркер: круг с заливкой и контрастной обводкой.
+            self.ax.plot(
+                re[i_cross], im[i_cross],
+                marker="o",
+                markersize=9,
+                markerfacecolor=color,
+                markeredgecolor="black",
+                markeredgewidth=1.2,
+                linestyle="none",
+                zorder=5,  # поверх кривой
+            )
+            self.ax.annotate(
+                f"  Re={re[i_cross]:.3g}\n  Im={im[i_cross]:.3g}",
+                xy=(re[i_cross], im[i_cross]),
+                xytext=(10, 10), textcoords="offset points",
+                fontsize=9, color=color,
+                fontweight="bold",
+                bbox=dict(boxstyle="round,pad=0.3",
+                          facecolor="white",
+                          edgecolor=color,
+                          alpha=0.8),
+            )
+        else:
+            i_cross = 0
+
         if self.ticks_var.get():
             self._draw_hatch_ticks(re, im, color=color)
 
