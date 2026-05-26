@@ -262,7 +262,7 @@ class DPartitionApp:
             f"Готово. Точек: {omega.size}.\n"
             f"{meta}\n"
             f"Re-пересечение: {re[i_cross]:.4g}, "
-            f"Im там: {im[i_cross]:.4g}."
+            f"Im: {im[i_cross]:.4g}."
         )
 
     def on_reset(self):
