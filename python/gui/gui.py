@@ -193,60 +193,73 @@ class DPartitionApp:
             )
             return
 
-        # Вблизи резонансов δ̂ имеет полюсы — значения уходят в
-        # бесконечность. Вместо того, чтобы удалять такие точки
-        # (тогда matplotlib соединит соседей через весь экран
-        # длинной прямой), вставляем туда NaN — это разрывает
-        # линию, как и должно быть для кривой с разрывом.
+        ##-----------------------------
+    
         mag = np.hypot(re, im)
         if mag.size > 10:
             cap = 50.0 * np.median(mag)
             re = np.where(mag < cap, re, np.nan)
             im = np.where(mag < cap, im, np.nan)
+        else:
+            # Если точек мало, порог всё равно нужен для поиска пересечений.
+            cap = 50.0 * np.median(mag) if mag.size else np.inf
 
-        # Рисуем. Если не "наложение" — очищаем.
         if not self.hold_var.get():
             self._reset_axes()
             self._curve_count = 0
 
-    
         label = (f"L={params['L']:g} м, δ₁={params['delta1']:g}, "
                  f"ω∈[{params['w_min']:g}, {params['w_max']:g}]")
 
         color = f"C{self._curve_count % 10}"
         self.ax.plot(re, im, "-", color=color, linewidth=1.2, label=label)
 
-        # Точка с минимальным |Im| — там, где кривая пересекает Re-ось:
-        # это та самая характеристическая точка из отчёта (-94.84; 2.04).
+        # Ищем ВСЕ пересечения кривой с осью Re (где Im меняет знак),
+        # а среди них — самое левое (с наибольшим |Re|). Именно оно
+        # определяет границу области устойчивости в методе D-разбиения,
+        # а не ближайшее к нулю пересечение на мелких внутренних петлях.
+        finite = np.isfinite(im) & np.isfinite(re)
+        idx_all = np.where(finite)[0]
+        i_cross = None
+        if idx_all.size > 1:
+            im_f = im[idx_all]
+            re_f = re[idx_all]
+            # Индексы, где Im меняет знак между соседними точками:
+            sign_change = np.where(np.diff(np.sign(im_f)) != 0)[0]
+            # Отбрасываем переходы через разрыв (NaN уже убран маской,
+            # но скачок через полюс даёт огромный |Re| — отсечём вне cap).
+            crossings = [k for k in sign_change
+                         if abs(re_f[k]) < cap]
+            if crossings:
+                # Самое левое пересечение = максимум |Re|:
+                k_first = crossings[0]
+                i_cross = idx_all[k_first]
+        if i_cross is None:
+            # Резерв: если пересечений не нашли, берём минимум |Im|.
+            i_cross = idx_all[np.argmin(np.abs(im[idx_all]))] if idx_all.size else 0
 
-        finite_mask = np.isfinite(im) & np.isfinite(re)
-        if finite_mask.any():
-            valid_idx = np.where(finite_mask)[0]
-            i_cross = valid_idx[np.argmin(np.abs(im[valid_idx]))]
-            # Заметный маркер: круг с заливкой и контрастной обводкой.
-            self.ax.plot(
-                re[i_cross], im[i_cross],
-                marker="o",
-                markersize=9,
-                markerfacecolor=color,
-                markeredgecolor="black",
-                markeredgewidth=1.2,
-                linestyle="none",
-                zorder=5,  # поверх кривой
-            )
-            self.ax.annotate(
-                f"  Re={re[i_cross]:.3g}\n  Im={im[i_cross]:.3g}",
-                xy=(re[i_cross], im[i_cross]),
-                xytext=(10, 10), textcoords="offset points",
-                fontsize=9, color=color,
-                fontweight="bold",
-                bbox=dict(boxstyle="round,pad=0.3",
-                          facecolor="white",
-                          edgecolor=color,
-                          alpha=0.8),
-            )
-        else:
-            i_cross = 0
+        # Заметный маркер: круг с заливкой и контрастной обводкой.
+        self.ax.plot(
+            re[i_cross], im[i_cross],
+            marker="o",
+            markersize=9,
+            markerfacecolor=color,
+            markeredgecolor="black",
+            markeredgewidth=1.2,
+            linestyle="none",
+            zorder=5,  # поверх кривой
+        )
+        self.ax.annotate(
+            f"  Re={re[i_cross]:.3g}\n  Im={im[i_cross]:.3g}",
+            xy=(re[i_cross], im[i_cross]),
+            xytext=(10, 10), textcoords="offset points",
+            fontsize=9, color=color,
+            fontweight="bold",
+            bbox=dict(boxstyle="round,pad=0.3",
+                      facecolor="white",
+                      edgecolor=color,
+                      alpha=0.8),
+        )
 
         if self.ticks_var.get():
             self._draw_hatch_ticks(re, im, color=color)
@@ -264,6 +277,9 @@ class DPartitionApp:
             f"Re-пересечение: {re[i_cross]:.4g}, "
             f"Im: {im[i_cross]:.4g}."
         )
+
+
+    ##-------------------------------------------------------
 
     def on_reset(self):
         """Возвращает все поля к значениям по умолчанию."""
